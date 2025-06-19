@@ -162,7 +162,7 @@ function hydrigenLink() {
     //process.stdout.write(data); // Optional: see the CLI output
 
     // Match and capture the verification code
-    const codeMatch = safeJSONParse(data.match(/User verification code:\s*([A-Z0-9-]+)/));
+    const codeMatch = data.match(/User verification code:\s*([A-Z0-9-]+)/);
     if (codeMatch) {
       console.debug('\nAUTH-CODE');
       const code = codeMatch[1];
@@ -242,7 +242,7 @@ async function hydrogenDeployment() {
     ptyProcess2.onData((data) => {
         //process.stdout.write(data); // Optional: see the CLI output
     
-        if (safeJSONParse(data.includes("?  Select an environment to deploy to:"))) {
+        if (data.includes("?  Select an environment to deploy to:")) {
         console.debug('\nSELECT-ENVIRONMENT');
         setTimeout(() => {
             // Press "Enter" to select the default option
