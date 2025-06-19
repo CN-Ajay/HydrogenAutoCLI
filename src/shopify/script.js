@@ -28,37 +28,17 @@ export function dummyGitCommit(themeDir) {
 }
 //dummyGitCommit(themeDir);
 
-function safeJSONParse(data) {
-    try {
-        return JSON.parse(data);
-    } catch (error) {
-        console.error('Failed to parse JSON:', error);
-        console.debug('Problematic data:', data);
-        return null;
-    }
-}
-
 export function hydrigenLink() {
-    const ptyProcess = pty.spawn("shopify", ["hydrogen", "link"], {
-        name: "xterm-color",
-        cwd: themeDir,
-        env: process.env,
-        cols: 80,
-        rows: 30,
-    });
+  const ptyProcess = pty.spawn("shopify", ["hydrogen", "link"], {
+    name: "xterm-color",
+    cwd: themeDir,
+    env: process.env,
+    cols: 80,
+    rows: 30,
+  });
 
-    ptyProcess.onData((data) => {
-        // Ensure data is properly stringified before any operations
-        const safeData = String(data).trim();
-        
-        // Try to parse if it looks like JSON
-        if (safeData.startsWith('{') || safeData.startsWith('[')) {
-            const parsed = safeJSONParse(safeData);
-            if (parsed) {
-                // Handle parsed JSON
-                console.debug('Received JSON:', parsed);
-            }
-        }
+  ptyProcess.onData((data) => {
+    //process.stdout.write(data); // Optional: see the CLI output
 
     // Match and capture the verification code
     const codeMatch = data.match(/User verification code:\s*([A-Z0-9-]+)/);
@@ -130,7 +110,7 @@ export function hydrigenLink() {
 }
 //hydrigenLink();
 
- async function hydrogenDeployment() {
+export async function hydrogenDeployment() {
     const ptyProcess2 = pty.spawn("shopify", ["hydrogen", "deploy"], {
         name: "xterm-color",
         cwd: themeDir,
@@ -179,28 +159,4 @@ export function hydrigenLink() {
         }
     });
 }
-
-// Add this where you initialize your EventSource
-const eventSource = new EventSource('/your-endpoint');
-
-eventSource.onerror = (error) => {
-    console.error('EventSource failed:', error);
-    // Optionally reconnect or handle the error
-    if (eventSource.readyState === EventSource.CLOSED) {
-        console.log('EventSource connection closed');
-    }
-};
-
-eventSource.onopen = () => {
-    console.log('EventSource connection established');
-};
-
-// Add this to your error handling code
-window.addEventListener('unhandledrejection', event => {
-    console.error('Unhandled promise rejection:', event.reason);
-});
-
-process.on('uncaughtException', (error) => {
-    console.error('Uncaught exception:', error);
-});
 
