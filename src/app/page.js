@@ -1,6 +1,7 @@
 "use client"
 import { useState } from 'react';
-import {theme } from '@/hydrogen-storefront'
+// Remove the import that's causing the error
+// import {theme } from '@/hydrogen-storefront'
 
 
 export default function StoreCreator() {
