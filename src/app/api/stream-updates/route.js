@@ -14,7 +14,6 @@ const themeDir = join(process.cwd(), 'hydrogen-storefront');
 export async function GET() {
   const encoder = new TextEncoder();
   
-
   
   const stream = new ReadableStream({
     async start(controller) {
@@ -39,6 +38,7 @@ export async function GET() {
       } catch (error) {
         const errorMsg = error.message.replace(/"/g, '\\"');
         controller.enqueue(encoder.encode(`data: {"error":"${errorMsg}"}\n\n`));
+
         controller.close();
       }
     }
@@ -74,6 +74,7 @@ function safeJSONParse(data) {
       return null;
   }
 }
+
 
 //npm create @shopify/hydrogen@latest
 
@@ -163,6 +164,7 @@ function hydrigenLink() {
 
     // Match and capture the verification code
     const codeMatch = safeJSONParse(data.match(/User verification code:\s*([A-Z0-9-]+)/));
+
     if (codeMatch) {
       console.debug('\nAUTH-CODE');
       const code = codeMatch[1];
@@ -243,6 +245,7 @@ async function hydrogenDeployment() {
         //process.stdout.write(data); // Optional: see the CLI output
     
         if (safeJSONParse(data.includes("?  Select an environment to deploy to:"))) {
+
         console.debug('\nSELECT-ENVIRONMENT');
         setTimeout(() => {
             // Press "Enter" to select the default option
