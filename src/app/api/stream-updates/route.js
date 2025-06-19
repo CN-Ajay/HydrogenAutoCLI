@@ -36,7 +36,9 @@ export async function GET() {
 
         controller.close();
       } catch (error) {
-        controller.enqueue(encoder.encode(`data: {"error":"${(error).message}"}\n\n`));
+        const errorMsg = error.message.replace(/"/g, '\\"');
+        controller.enqueue(encoder.encode(`data: {"error":"${errorMsg}"}\n\n`));
+
         controller.close();
       }
     }
@@ -62,6 +64,17 @@ export async function GET() {
 function logoutExistingSession() {
     execSync("shopify auth logout", {});
 }
+
+function safeJSONParse(data) {
+  try {
+      return JSON.parse(data);
+  } catch (error) {
+      console.error('Failed to parse JSON:', error);
+      console.debug('Problematic data:', data);
+      return null;
+  }
+}
+
 
 //npm create @shopify/hydrogen@latest
 
@@ -150,7 +163,8 @@ function hydrigenLink() {
     //process.stdout.write(data); // Optional: see the CLI output
 
     // Match and capture the verification code
-    const codeMatch = data.match(/User verification code:\s*([A-Z0-9-]+)/);
+    const codeMatch = safeJSONParse(data.match(/User verification code:\s*([A-Z0-9-]+)/));
+
     if (codeMatch) {
       console.debug('\nAUTH-CODE');
       const code = codeMatch[1];
@@ -230,7 +244,8 @@ async function hydrogenDeployment() {
     ptyProcess2.onData((data) => {
         //process.stdout.write(data); // Optional: see the CLI output
     
-        if (data.includes("?  Select an environment to deploy to:")) {
+        if (safeJSONParse(data.includes("?  Select an environment to deploy to:"))) {
+
         console.debug('\nSELECT-ENVIRONMENT');
         setTimeout(() => {
             // Press "Enter" to select the default option
