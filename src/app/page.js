@@ -67,7 +67,18 @@ const handleStreamingUpdates = async () => {
           onClick={handleStreamingUpdates}>
             Click me
           </button>
-    
-    </div>
-  );
+          {streamingUpdates.error && (
+            <div className="text-red-500 mt-4">
+              <p>Error: {streamingUpdates.error}</p>
+            </div>
+          )}
+          {streamingUpdates.message && (
+            <div className="text-gray-700 mt-4">
+              <p>{streamingUpdates.message}</p>
+              <p>Step: {streamingUpdates.step}</p>
+              <p>Progress: {streamingUpdates.progress}%</p>
+            </div>
+          )}
+        </div>
+      );
 }
