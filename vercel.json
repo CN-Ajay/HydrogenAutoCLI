@@ -1,5 +1,4 @@
 {
-  "version": 2,
   "builds": [
     {
       "src": "package.json",
@@ -10,10 +9,7 @@
       }
     }
   ],
-  "functions": {
-    "app/api/stream-updates/route.js": {
-      "memory": 1024,
-      "maxDuration": 60
-    }
+  "env": {
+    "SHOPIFY_CLI_PATH": "./node_modules/.bin/shopify"
   }
 }
