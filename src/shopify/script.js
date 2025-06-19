@@ -8,7 +8,35 @@ const shell = os.platform() === "win32" ? "powershell.exe" : "bash";
 const themeDir = path.resolve("./hydrogen-storefront"); // Your Hydrogen project path
 
 export function logoutExistingSession() {
-    execSync("shopify auth logout", {});
+    try {
+        execSync("shopify auth logout", {
+            stdio: 'pipe',
+            shell: true
+        });
+        return true;
+    } catch (error) {
+        console.error('Shopify CLI error:', error.message);
+        if (error.message.includes('command not found')) {
+            console.log('⚠️ Shopify CLI is not installed. Installing...');
+            try {
+                execSync('npm install -g @shopify/cli @shopify/cli-hydrogen', {
+                    stdio: 'inherit',
+                    shell: true
+                });
+                console.log('✅ Shopify CLI installed successfully');
+                // Retry logout
+                execSync("shopify auth logout", {
+                    stdio: 'pipe',
+                    shell: true
+                });
+                return true;
+            } catch (installError) {
+                console.error('Failed to install Shopify CLI:', installError.message);
+                throw new Error('Failed to setup Shopify CLI');
+            }
+        }
+        throw error;
+    }
 }
 //logoutExistingSession();
 
@@ -110,7 +138,7 @@ export function hydrigenLink() {
 }
 //hydrigenLink();
 
-export async function hydrogenDeployment() {
+ async function hydrogenDeployment() {
     const ptyProcess2 = pty.spawn("shopify", ["hydrogen", "deploy"], {
         name: "xterm-color",
         cwd: themeDir,

@@ -1,48 +1,49 @@
-import { NextResponse } from 'next/server';
-import {logoutExistingSession, prepareHydrogenTheme, dummyGitCommit, hydrigenLink,hydrogenDeployment} from '@/shopify/script.js';
 
+import { NextResponse } from 'next/server';
+import {logoutExistingSession ,prepareHydrogenTheme,dummyGitCommit,hydrigenLink} from '@/shopify/script.js';
 export async function GET() {
   const encoder = new TextEncoder();
   
   const stream = new ReadableStream({
     async start(controller) {
-      const sendMessage = (message, step, progress) => {
-        const data = JSON.stringify({ message, step, progress });
-        controller.enqueue(encoder.encode(`data: ${data}\n\n`));
-      };
-
       try {
-        // Step 1
-        sendMessage("Starting store creation process", 1, 0);
-        await logoutExistingSession();
+        controller.enqueue(encoder.encode(`data: {"message":"Starting store creation process : logoutExistingSession()","step":1,"progress":0}\n\n`));
+        logoutExistingSession();
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Step 2
-        sendMessage("Preparing Hydrogen Theme", 2, 25);
-        await prepareHydrogenTheme();
+        controller.enqueue(encoder.encode(`data: {"message":"Preparing Hydrogen Theme","step":2,"progress":25}\n\n`));
+        prepareHydrogenTheme()
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Step 3
-        sendMessage("Creating dummy Git Commit", 3, 70);
-        await dummyGitCommit();
+        controller.enqueue(encoder.encode(`data: {"message":"Creating dummy Git Commit","step":3,"progress":70}\n\n`));
+        dummyGitCommit()
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Step 4
-        sendMessage("Setting up Hydrogen template & Link", 4, 100);
-        await hydrigenLink();
-        
+        controller.enqueue(encoder.encode(`data: {"message":"Setting up Hydrogen template & Link","step":4,"progress":100}\n\n`));
+        hydrigenLink();
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
         controller.close();
       } catch (error) {
-        sendMessage(error.message, -1, -1);
+        controller.enqueue(encoder.encode(`data: {"error":"${(error).message}"}\n\n`));
         controller.close();
       }
     }
   });
-
+  
+  // Create a NextResponse with the stream
   const response = new NextResponse(stream);
+   console.log("response :",response.body);
+   // Set headers for SSE
   response.headers.set('Content-Type', 'text/event-stream');
   response.headers.set('Cache-Control', 'no-cache');
   response.headers.set('Connection', 'keep-alive');
+  
+  // //  Set a cookie to track the session
+  // response.cookies.set('store-creation-session', 'active', {
+  //   maxAge: 600, // 10 minutes
+  //   path: '/'
+  // });
   
   return response;
 }
