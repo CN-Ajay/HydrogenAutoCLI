@@ -3,39 +3,23 @@ const path = require("path");
 const { spawn, execSync } = require("child_process");
 const pty = require("node-pty");
 
+// Use local shopify CLI path
+const shopifyCLIPath = path.resolve('./node_modules/.bin/shopify');
+
 const shell = os.platform() === "win32" ? "powershell.exe" : "bash";
 
 const themeDir = path.resolve("./hydrogen-storefront"); // Your Hydrogen project path
 
 export function logoutExistingSession() {
     try {
-        execSync("shopify auth logout", {
+        execSync(`"${shopifyCLIPath}" auth logout`, {
             stdio: 'pipe',
             shell: true
         });
         return true;
     } catch (error) {
         console.error('Shopify CLI error:', error.message);
-        if (error.message.includes('command not found')) {
-            console.log('⚠️ Shopify CLI is not installed. Installing...');
-            try {
-                execSync('npm install -g @shopify/cli @shopify/cli-hydrogen', {
-                    stdio: 'inherit',
-                    shell: true
-                });
-                console.log('✅ Shopify CLI installed successfully');
-                // Retry logout
-                execSync("shopify auth logout", {
-                    stdio: 'pipe',
-                    shell: true
-                });
-                return true;
-            } catch (installError) {
-                console.error('Failed to install Shopify CLI:', installError.message);
-                throw new Error('Failed to setup Shopify CLI');
-            }
-        }
-        throw error;
+        throw new Error('Failed to setup Shopify CLI');
     }
 }
 //logoutExistingSession();
@@ -57,10 +41,13 @@ export function dummyGitCommit(themeDir) {
 //dummyGitCommit(themeDir);
 
 export function hydrigenLink() {
-  const ptyProcess = pty.spawn("shopify", ["hydrogen", "link"], {
+  const ptyProcess = pty.spawn(shopifyCLIPath, ["hydrogen", "link"], {
     name: "xterm-color",
     cwd: themeDir,
-    env: process.env,
+    env: {
+      ...process.env,
+      PATH: `${path.dirname(shopifyCLIPath)}:${process.env.PATH}`
+    },
     cols: 80,
     rows: 30,
   });
